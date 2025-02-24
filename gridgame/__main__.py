@@ -1,8 +1,8 @@
 import argparse
 
-from gridgame.model import GridGameModel
-from gridgame.view import View
-from gridgame.controller import Controller
+from .model import GridGameModel
+from .view import View
+from .controller import Controller
 
 
 def str_list(line: str) -> list[str]:
