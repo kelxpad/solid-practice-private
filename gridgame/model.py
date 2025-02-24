@@ -73,7 +73,7 @@ class GridGameModel:
         )
 
     @property
-    def winner(self) -> PlayerId | None:
+    def winner(self) -> PlayerId | None: # put this part in tictactoewincondition
         row_groups = [
             [Cell(row, k) for k in self._field.valid_coords]
             for row in self._field.valid_coords
@@ -110,7 +110,7 @@ class GridGameModel:
 
         return [self._player_to_symbol[player]]
 
-    def place_symbol(self, symbol: Symbol, cell: Cell) -> Feedback:
+    def place_symbol(self, symbol: Symbol, cell: Cell) -> Feedback: # put this part sa tictactoesymbolplacer
         if self.is_game_over:
             return Feedback.GAME_OVER
 
