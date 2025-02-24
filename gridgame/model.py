@@ -1,10 +1,20 @@
 from collections.abc import Sequence
-
-from .project_types import PlayerId, Cell, Symbol, Feedback, Field
-
+from .variants import (SymbolPlacer,
+                       WinCondition
+                       )
+from .project_types import (PlayerId, 
+                            Cell, 
+                            Symbol, 
+                            Feedback, 
+                            Field)
 
 class GridGameModel:
-    def __init__(self, grid_size: int, player_symbols: Sequence[Symbol], player_count: int):
+    def __init__(self, 
+                 grid_size: int, 
+                 player_symbols: Sequence[Symbol], 
+                 player_count: int,
+                 symbol_placer: SymbolPlacer,
+                 win_condition: WinCondition):
         if player_count <= 1:
             raise ValueError(
                 f'Must have at least two players (found {player_count})')
