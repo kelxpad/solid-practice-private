@@ -76,7 +76,7 @@ class GridGameModel:
 
     @property
     def winner(self) -> PlayerId | None:
-        return self._win_condition.check_winner(self._field)
+        return self._win_condition.check_winner(self._field, self._symbol_to_player)
     
 
     def get_symbol_choices(self, player: PlayerId) -> list[Symbol]:
