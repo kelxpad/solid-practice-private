@@ -41,6 +41,8 @@ class GridGameModel:
             for k, symbol in self._player_to_symbol.items()
         }
         self._current_player: PlayerId = 1
+        self._symbol_placer = symbol_placer
+        self._win_condition = win_condition
 
     @property
     def occupied_cells(self) -> dict[Cell, Symbol]:
@@ -73,36 +75,9 @@ class GridGameModel:
         )
 
     @property
-    def winner(self) -> PlayerId | None: # put this part in tictactoewincondition
-        row_groups = [
-            [Cell(row, k) for k in self._field.valid_coords]
-            for row in self._field.valid_coords
-        ]
-
-        col_groups = [
-            [Cell(k, col) for k in self._field.valid_coords]
-            for col in self._field.valid_coords
-        ]
-
-        diagonals = [
-            # Backslash
-            [Cell(k, k) for k in self._field.valid_coords],
-            # Forward slash
-            [Cell(k, self._field.grid_size - k + 1)
-             for k in self._field.valid_coords],
-        ]
-
-        for groups in [row_groups, col_groups, diagonals]:
-            for group in groups:
-                if (basis := self._field.get_symbol_at(group[0])) is not None and \
-                        self._field.are_all_equal_to_basis(basis, group):
-                    winner = self._symbol_to_player.get(basis)
-                    assert winner is not None, \
-                        f'Winning symbol {basis} in cell group {groups} has no associated player'
-
-                    return winner
-
-        return None
+    def winner(self) -> PlayerId | None:
+        return self._win_condition.check_winner(self._field)
+    
 
     def get_symbol_choices(self, player: PlayerId) -> list[Symbol]:
         if player not in self._player_to_symbol:
@@ -111,22 +86,10 @@ class GridGameModel:
         return [self._player_to_symbol[player]]
 
     def place_symbol(self, symbol: Symbol, cell: Cell) -> Feedback: # put this part sa tictactoesymbolplacer
-        if self.is_game_over:
-            return Feedback.GAME_OVER
-
-        if symbol not in self.get_symbol_choices(self.current_player):
-            return Feedback.INVALID_SYMBOL
-
-        if not self._field.is_within_bounds(cell):
-            return Feedback.OUT_OF_BOUNDS
-
-        if self._field.get_symbol_at(cell) is not None:
-            return Feedback.OCCUPIED
-
-        self._field.place_symbol(symbol, cell)
-        self._switch_to_next_player()
-
-        return Feedback.VALID
+        result = self._symbol_placer.place_symbol(self._field, symbol, cell)
+        if result == Feedback.VALID:
+            self._switch_to_next_player()
+        return result
 
     def _switch_to_next_player(self):
         self._current_player = self.next_player

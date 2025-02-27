@@ -3,6 +3,9 @@ import argparse
 from .model import GridGameModel
 from .view import View
 from .controller import Controller
+from .variants import (TicTacToeSymbolPlacer,
+                       TicTacToeWinCondition,
+                       )
 
 
 def str_list(line: str) -> list[str]:
@@ -30,10 +33,12 @@ def make_model(args: argparse.Namespace):
                 grid_size=args.size,
                 player_count=args.player_count,
                 player_symbols=args.symbols,
+                symbol_placer=TicTacToeSymbolPlacer(),
+                win_condition=TicTacToeWinCondition()
             )
 
         case "wild":
-            raise NotImplementedError('wild variant is not yet implemented')
+            raise NotImplementedError('wala pa to')
 
         case "notakto":
             raise NotImplementedError('notakto variant is not yet implemented')
