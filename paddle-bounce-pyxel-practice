@@ -1,0 +1,84 @@
+import pyxel
+import math
+
+# Constants
+WIDTH, HEIGHT = 160, 120
+PADDLE_WIDTH, PADDLE_HEIGHT = 30, 4
+BALL_RADIUS = 2
+GRAVITY = 0.2
+BOUNCE_FORCE = -2.5
+BOOST_FORCE = -4.0
+PADDLE_SPEED = 2
+
+class Game:
+    def __init__(self):
+        pyxel.init(WIDTH, HEIGHT, title="Paddle Bounce")
+        self.reset_game()
+        pyxel.run(self.update, self.draw)
+
+    def reset_game(self):
+        self.paddle_x = WIDTH // 2 - PADDLE_WIDTH // 2
+        self.paddle_y = HEIGHT - 15
+        self.ball_x = WIDTH // 2
+        self.ball_y = HEIGHT // 4
+        self.ball_vx = 0
+        self.ball_vy = 0
+        self.game_over = False
+
+    def update(self):
+        if self.game_over:
+            return
+        
+        # Paddle movement
+        if pyxel.btn(pyxel.KEY_A):
+            self.paddle_x = max(0, self.paddle_x - PADDLE_SPEED)
+        if pyxel.btn(pyxel.KEY_D):
+            self.paddle_x = min(WIDTH - PADDLE_WIDTH, self.paddle_x + PADDLE_SPEED)
+        
+        # Ball physics
+        self.ball_vy += GRAVITY
+        self.ball_x += self.ball_vx
+        self.ball_y += self.ball_vy
+        
+        # Wall collisions
+        if self.ball_x - BALL_RADIUS <= 0 or self.ball_x + BALL_RADIUS >= WIDTH:
+            self.ball_vx *= -1
+        if self.ball_y - BALL_RADIUS <= 0:
+            self.ball_vy *= -1
+        
+        # Paddle collision
+        if (self.paddle_y - BALL_RADIUS <= self.ball_y <= self.paddle_y + PADDLE_HEIGHT and
+                self.paddle_x <= self.ball_x <= self.paddle_x + PADDLE_WIDTH):
+            segment_width = PADDLE_WIDTH / 5
+            segment = int((self.ball_x - self.paddle_x) // segment_width) + 1
+            
+            # Determine bounce angle
+            angle = {3: 0, 2: 30, 4: 30, 1: 60, 5: 60}.get(segment, 0)
+            
+            # Determine force
+            force = BOOST_FORCE if pyxel.btn(pyxel.KEY_W) else BOUNCE_FORCE
+            
+            # Convert angle to velocity
+            rad = math.radians(angle)
+            self.ball_vx = math.sin(rad) * -force if segment < 3 else math.sin(rad) * force
+            self.ball_vy = math.cos(rad) * force
+            self.ball_y = self.paddle_y - BALL_RADIUS  # Prevent sticking
+        
+        # Game over condition
+        if self.ball_y >= HEIGHT:
+            self.game_over = True
+
+    def draw(self):
+        pyxel.cls(0)
+        
+        # Draw paddle
+        pyxel.rect(self.paddle_x, self.paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT, 9)
+        
+        # Draw ball
+        pyxel.circ(self.ball_x, self.ball_y, BALL_RADIUS, 7)
+        
+        # Draw game over
+        if self.game_over:
+            pyxel.text(WIDTH // 2 - 20, HEIGHT // 2, "GAME OVER", 8)
+
+Game()
